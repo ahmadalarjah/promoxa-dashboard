@@ -11,13 +11,16 @@ import {
   RefreshCw,
   Download,
   BarChart3,
-  Settings
+  Settings,
+  Copy,
+  ExternalLink
 } from 'lucide-react';
 import DataTable from '../components/common/DataTable';
 import StatCard from '../components/common/StatCard';
 import AdvancedFilter from '../components/common/AdvancedFilter';
 import QuickFilter from '../components/common/QuickFilter';
 import DepositSettings from '../components/common/DepositSettings';
+import WalletAddress from '../components/common/WalletAddress';
 import apiService from '../services/apiService';
 import { toast } from 'react-toastify';
 
@@ -210,6 +213,8 @@ const FinancialManagement: React.FC = () => {
     }
   };
 
+
+
   const handleQuickFilter = (filters: FilterOptions) => {
     setCurrentFilters(filters);
     setActiveQuickFilter(Object.keys(filters).length === 0 ? 'all' : 
@@ -339,9 +344,7 @@ const FinancialManagement: React.FC = () => {
       key: 'walletAddress',
       label: 'Wallet',
       render: (value: string) => (
-        <div className="font-mono text-sm">
-          {value.length > 15 ? `${value.substring(0, 15)}...` : value}
-        </div>
+        <WalletAddress address={value} />
       )
     },
     {
@@ -428,7 +431,7 @@ const FinancialManagement: React.FC = () => {
           icon={TrendingUp}
           iconColor="text-green-600"
           change={`${deposits.filter(d => d.status === 'CONFIRMED').length} confirmed`}
-          changeType="positive"
+          changeType="increase"
         />
         <StatCard
           title="Total Withdrawals"
