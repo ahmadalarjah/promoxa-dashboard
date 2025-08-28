@@ -57,7 +57,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
 
       {/* Navigation */}
       <nav className="mt-6 px-3">
-        <ul className="space-y-2">
+        <ul className="space-y-1">
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = location.pathname === item.path;
@@ -66,15 +66,20 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
               <li key={item.path}>
                 <Link
                   to={item.path}
-                  className={`flex items-center px-3 py-3 rounded-lg transition-all duration-200 group ${
+                  className={`flex items-center px-3 py-3 rounded-lg transition-all duration-200 group relative ${
                     isActive
-                      ? 'bg-blue-50 text-blue-700 border-r-4 border-blue-600'
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                      ? 'bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700 border-r-4 border-blue-600 shadow-sm'
+                      : 'text-gray-600 hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 hover:text-gray-900'
                   }`}
                 >
-                  <Icon className={`h-5 w-5 ${isActive ? 'text-blue-600' : item.color} transition-colors duration-200`} />
+                  <Icon className={`h-5 w-5 ${isActive ? 'text-blue-600' : item.color} transition-colors duration-200 group-hover:scale-110`} />
                   {isOpen && (
                     <span className="ml-3 font-medium text-sm">{item.label}</span>
+                  )}
+                  
+                  {/* Active indicator */}
+                  {isActive && (
+                    <div className="absolute right-2 w-2 h-2 bg-blue-600 rounded-full"></div>
                   )}
                   
                   {/* Tooltip for collapsed state */}
