@@ -8,7 +8,14 @@ import {
   AlertCircle,
   CheckCircle,
   Clock,
-  Activity
+  Activity,
+  BarChart3,
+  Shield,
+  Settings,
+  Bell,
+  Eye,
+  ArrowUpRight,
+  ArrowDownRight
 } from 'lucide-react';
 import StatCard from '../components/common/StatCard';
 import apiService from '../services/apiService';
@@ -25,11 +32,26 @@ interface AdminStats {
   pendingWithdrawals: number;
 }
 
+interface RecentActivity {
+  id: string;
+  action: string;
+  user?: string;
+  amount?: string;
+  time: string;
+  type: 'success' | 'warning' | 'info' | 'neutral' | 'error';
+  icon: React.ComponentType<any>;
+}
+
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [loading, setLoading] = useState(true);
-  const [recentActivity, setRecentActivity] = useState([]);
+  const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
+  const [systemAlerts, setSystemAlerts] = useState([
+    { id: 1, type: 'info', message: 'System maintenance scheduled for tomorrow at 2 AM', time: '2 hours ago' },
+    { id: 2, type: 'warning', message: 'High withdrawal volume detected', time: '4 hours ago' },
+    { id: 3, type: 'success', message: 'Database backup completed successfully', time: '6 hours ago' }
+  ]);
 
   useEffect(() => {
     fetchDashboardData();
@@ -188,7 +210,7 @@ const Dashboard: React.FC = () => {
         />
       </div>
 
-      {/* Quick Actions & Recent Activity */}
+      {/* Quick Actions & System Status */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Quick Actions */}
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
@@ -196,106 +218,205 @@ const Dashboard: React.FC = () => {
           <div className="grid grid-cols-2 gap-4">
             <button 
               onClick={() => navigate('/users')}
-              className="flex items-center justify-center p-4 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors duration-200 cursor-pointer"
+              className="flex items-center justify-center p-4 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors duration-200 cursor-pointer group"
             >
-              <Users className="h-5 w-5 mr-2" />
-              Manage Users
+              <Users className="h-5 w-5 mr-2 group-hover:scale-110 transition-transform duration-200" />
+              <span className="font-medium">Manage Users</span>
             </button>
             <button 
               onClick={() => navigate('/finance')}
-              className="flex items-center justify-center p-4 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors duration-200 cursor-pointer"
+              className="flex items-center justify-center p-4 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors duration-200 cursor-pointer group"
             >
-              <DollarSign className="h-5 w-5 mr-2" />
-              Financial Overview
+              <DollarSign className="h-5 w-5 mr-2 group-hover:scale-110 transition-transform duration-200" />
+              <span className="font-medium">Financial Overview</span>
             </button>
             <button 
               onClick={() => navigate('/finance?tab=deposits')}
-              className="flex items-center justify-center p-4 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-colors duration-200 cursor-pointer"
+              className="flex items-center justify-center p-4 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-colors duration-200 cursor-pointer group"
             >
-              <CheckCircle className="h-5 w-5 mr-2" />
-              Approve Deposits
+              <CheckCircle className="h-5 w-5 mr-2 group-hover:scale-110 transition-transform duration-200" />
+              <span className="font-medium">Approve Deposits</span>
             </button>
             <button 
               onClick={() => navigate('/finance?tab=withdrawals')}
-              className="flex items-center justify-center p-4 bg-orange-50 text-orange-700 rounded-lg hover:bg-orange-100 transition-colors duration-200 cursor-pointer"
+              className="flex items-center justify-center p-4 bg-orange-50 text-orange-700 rounded-lg hover:bg-orange-100 transition-colors duration-200 cursor-pointer group"
             >
-              <Clock className="h-5 w-5 mr-2" />
-              Process Withdrawals
+              <Clock className="h-5 w-5 mr-2 group-hover:scale-110 transition-transform duration-200" />
+              <span className="font-medium">Process Withdrawals</span>
+            </button>
+            <button 
+              onClick={() => navigate('/plans')}
+              className="flex items-center justify-center p-4 bg-indigo-50 text-indigo-700 rounded-lg hover:bg-indigo-100 transition-colors duration-200 cursor-pointer group"
+            >
+              <BarChart3 className="h-5 w-5 mr-2 group-hover:scale-110 transition-transform duration-200" />
+              <span className="font-medium">Manage Plans</span>
+            </button>
+            <button 
+              onClick={() => navigate('/support')}
+              className="flex items-center justify-center p-4 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors duration-200 cursor-pointer group"
+            >
+              <Shield className="h-5 w-5 mr-2 group-hover:scale-110 transition-transform duration-200" />
+              <span className="font-medium">Support Tickets</span>
             </button>
           </div>
         </div>
 
-        {/* System Status */}
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">System Status</h3>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-              <div className="flex items-center">
-                <div className="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
-                <span className="text-sm font-medium text-gray-900">Database</span>
+        {/* System Status & Alerts */}
+        <div className="space-y-6">
+          {/* System Status */}
+          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">System Status</h3>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                <div className="flex items-center">
+                  <div className="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
+                  <span className="text-sm font-medium text-gray-900">Database</span>
+                </div>
+                <span className="text-sm text-green-600">Online</span>
               </div>
-              <span className="text-sm text-green-600">Online</span>
-            </div>
-            
-            <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-              <div className="flex items-center">
-                <div className="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
-                <span className="text-sm font-medium text-gray-900">API Services</span>
+              
+              <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                <div className="flex items-center">
+                  <div className="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
+                  <span className="text-sm font-medium text-gray-900">API Services</span>
+                </div>
+                <span className="text-sm text-green-600">Operational</span>
               </div>
-              <span className="text-sm text-green-600">Operational</span>
-            </div>
-            
-            <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
-              <div className="flex items-center">
-                <div className="w-3 h-3 bg-yellow-500 rounded-full mr-3"></div>
-                <span className="text-sm font-medium text-gray-900">Background Jobs</span>
+              
+              <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
+                <div className="flex items-center">
+                  <div className="w-3 h-3 bg-yellow-500 rounded-full mr-3"></div>
+                  <span className="text-sm font-medium text-gray-900">Background Jobs</span>
+                </div>
+                <span className="text-sm text-yellow-600">Processing</span>
               </div>
-              <span className="text-sm text-yellow-600">Processing</span>
-            </div>
 
-            <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
-              <div className="flex items-center">
-                <div className="w-3 h-3 bg-blue-500 rounded-full mr-3"></div>
-                <span className="text-sm font-medium text-gray-900">WebSocket</span>
+              <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                <div className="flex items-center">
+                  <div className="w-3 h-3 bg-blue-500 rounded-full mr-3"></div>
+                  <span className="text-sm font-medium text-gray-900">WebSocket</span>
+                </div>
+                <span className="text-sm text-blue-600">Connected</span>
               </div>
-              <span className="text-sm text-blue-600">Connected</span>
+            </div>
+          </div>
+
+          {/* System Alerts */}
+          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">System Alerts</h3>
+            <div className="space-y-3">
+              {systemAlerts.map((alert) => (
+                <div key={alert.id} className={`flex items-center justify-between p-3 rounded-lg ${
+                  alert.type === 'warning' ? 'bg-yellow-50' :
+                  alert.type === 'success' ? 'bg-green-50' :
+                  alert.type === 'error' ? 'bg-red-50' : 'bg-blue-50'
+                }`}>
+                  <div className="flex items-center">
+                    <div className={`w-3 h-3 rounded-full mr-3 ${
+                      alert.type === 'warning' ? 'bg-yellow-500' :
+                      alert.type === 'success' ? 'bg-green-500' :
+                      alert.type === 'error' ? 'bg-red-500' : 'bg-blue-500'
+                    }`}></div>
+                    <span className="text-sm font-medium text-gray-900">{alert.message}</span>
+                  </div>
+                  <span className="text-xs text-gray-500">{alert.time}</span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       </div>
 
-      {/* Recent Activity */}
-      <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-gray-900">Recent Activity</h3>
-          <button className="text-sm text-blue-600 hover:text-blue-800">View All</button>
+      {/* Recent Activity & Performance Metrics */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Recent Activity */}
+        <div className="lg:col-span-2 bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-gray-900">Recent Activity</h3>
+            <button className="text-sm text-blue-600 hover:text-blue-800 flex items-center">
+              View All
+              <ArrowUpRight className="h-3 w-3 ml-1" />
+            </button>
+          </div>
+          <div className="space-y-3">
+            {[
+              { action: 'New user registration', user: 'john_doe', time: '2 minutes ago', type: 'success', icon: Users },
+              { action: 'Deposit confirmed', amount: '$500', time: '5 minutes ago', type: 'success', icon: CheckCircle },
+              { action: 'Withdrawal pending', amount: '$250', time: '12 minutes ago', type: 'warning', icon: Clock },
+              { action: 'Plan upgraded', user: 'sarah_smith', time: '25 minutes ago', type: 'info', icon: TrendingUp },
+              { action: 'Support ticket created', user: 'mike_jones', time: '1 hour ago', type: 'neutral', icon: Bell }
+            ].map((activity, index) => (
+              <div key={index} className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors duration-200">
+                <div className="flex items-center">
+                  <div className={`p-2 rounded-full mr-3 ${
+                    activity.type === 'success' ? 'bg-green-100 text-green-600' :
+                    activity.type === 'warning' ? 'bg-yellow-100 text-yellow-600' :
+                    activity.type === 'info' ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600'
+                  }`}>
+                    <activity.icon className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">{activity.action}</p>
+                    <p className="text-xs text-gray-500">
+                      {activity.user && `User: ${activity.user}`}
+                      {activity.amount && `Amount: ${activity.amount}`}
+                    </p>
+                  </div>
+                </div>
+                <span className="text-xs text-gray-500">{activity.time}</span>
+              </div>
+            ))}
+          </div>
         </div>
-        <div className="space-y-3">
-          {[
-            { action: 'New user registration', user: 'john_doe', time: '2 minutes ago', type: 'success' },
-            { action: 'Deposit confirmed', amount: '$500', time: '5 minutes ago', type: 'success' },
-            { action: 'Withdrawal pending', amount: '$250', time: '12 minutes ago', type: 'warning' },
-            { action: 'Plan upgraded', user: 'sarah_smith', time: '25 minutes ago', type: 'info' },
-            { action: 'Support ticket created', user: 'mike_jones', time: '1 hour ago', type: 'neutral' }
-          ].map((activity, index) => (
-            <div key={index} className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg">
+
+        {/* Performance Metrics */}
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Performance Metrics</h3>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
               <div className="flex items-center">
-                <div className={`w-2 h-2 rounded-full mr-3 ${
-                  activity.type === 'success' ? 'bg-green-500' :
-                  activity.type === 'warning' ? 'bg-yellow-500' :
-                  activity.type === 'info' ? 'bg-blue-500' : 'bg-gray-400'
-                }`}></div>
+                <ArrowUpRight className="h-5 w-5 text-blue-600 mr-3" />
                 <div>
-                  <p className="text-sm font-medium text-gray-900">{activity.action}</p>
-                  <p className="text-xs text-gray-500">
-                    {activity.user && `User: ${activity.user}`}
-                    {activity.amount && `Amount: ${activity.amount}`}
-                  </p>
+                  <p className="text-sm font-medium text-gray-900">User Growth</p>
+                  <p className="text-xs text-gray-500">This month</p>
                 </div>
               </div>
-              <span className="text-xs text-gray-500">{activity.time}</span>
+              <span className="text-lg font-bold text-blue-600">+12.5%</span>
             </div>
-          ))}
+            
+            <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+              <div className="flex items-center">
+                <TrendingUp className="h-5 w-5 text-green-600 mr-3" />
+                <div>
+                  <p className="text-sm font-medium text-gray-900">Revenue</p>
+                  <p className="text-xs text-gray-500">This week</p>
+                </div>
+              </div>
+              <span className="text-lg font-bold text-green-600">+8.2%</span>
+            </div>
+            
+            <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
+              <div className="flex items-center">
+                <BarChart3 className="h-5 w-5 text-purple-600 mr-3" />
+                <div>
+                  <p className="text-sm font-medium text-gray-900">Conversion Rate</p>
+                  <p className="text-xs text-gray-500">Overall</p>
+                </div>
+              </div>
+              <span className="text-lg font-bold text-purple-600">3.2%</span>
+            </div>
+            
+            <div className="flex items-center justify-between p-3 bg-orange-50 rounded-lg">
+              <div className="flex items-center">
+                <ArrowDownRight className="h-5 w-5 text-orange-600 mr-3" />
+                <div>
+                  <p className="text-sm font-medium text-gray-900">Churn Rate</p>
+                  <p className="text-xs text-gray-500">This month</p>
+                </div>
+              </div>
+              <span className="text-lg font-bold text-orange-600">-2.1%</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
