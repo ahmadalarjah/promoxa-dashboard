@@ -5,7 +5,7 @@ class ApiService {
 
   constructor() {
     this.api = axios.create({
-      baseURL: 'http://localhost:8080/api',
+      baseURL: 'https://api.promoxa.org/api',
       timeout: 30000,
       headers: {
         'Content-Type': 'application/json',
