@@ -74,13 +74,13 @@ const FinancialManagement: React.FC = () => {
     currentPage: 0,
     totalPages: 0,
     totalElements: 0,
-    size: 20
+    size: 55
   });
   const [withdrawalsPagination, setWithdrawalsPagination] = useState({
     currentPage: 0,
     totalPages: 0,
     totalElements: 0,
-    size: 20
+    size: 55
   });
 
   useEffect(() => {
@@ -105,7 +105,7 @@ const FinancialManagement: React.FC = () => {
       const response = await apiService.getFilteredDeposits({
         ...filters,
         page,
-        size: 20
+        size: 55
       });
       setDeposits(response.data.content);
       setDepositsPagination({
@@ -128,7 +128,7 @@ const FinancialManagement: React.FC = () => {
       const response = await apiService.getFilteredWithdrawals({
         ...filters,
         page,
-        size: 20
+        size: 55
       });
       setWithdrawals(response.data.content);
       setWithdrawalsPagination({
