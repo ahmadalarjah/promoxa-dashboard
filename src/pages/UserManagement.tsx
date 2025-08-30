@@ -331,7 +331,7 @@ const UserManagement: React.FC = () => {
     currentPage: 0,
     totalPages: 0,
     totalElements: 0,
-    size: 20
+    size: 55
   });
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [showBalanceModal, setShowBalanceModal] = useState(false);
