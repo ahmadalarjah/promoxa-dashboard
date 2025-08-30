@@ -75,7 +75,7 @@ class ApiService {
     return this.get('/admin/stats');
   }
 
-  public async getAllUsers(page = 0, size = 20, sort = 'createdAt,desc') {
+  public async getAllUsers(page = 0, size = 55, sort = 'createdAt,desc') {
     return this.get(`/admin/users?page=${page}&size=${size}&sort=${sort}`);
   }
 
@@ -107,7 +107,7 @@ class ApiService {
     return this.post(`/admin/users/${userId}/unban`);
   }
 
-  public async getPendingDeposits(page = 0, size = 20) {
+  public async getPendingDeposits(page = 0, size = 55) {
     return this.get(`/admin/deposits/pending?page=${page}&size=${size}`);
   }
 
@@ -126,7 +126,7 @@ class ApiService {
     const params = new URLSearchParams();
     Object.entries(filters).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== '') {
-        params.append(key, value);
+        params.append(key, String(value));
       }
     });
     return this.get(`/admin/deposits/filtered?${params.toString()}`);
@@ -142,7 +142,7 @@ class ApiService {
     return this.put(`/admin/deposits/${depositId}/reject${params}`);
   }
 
-  public async getPendingWithdrawals(page = 0, size = 20) {
+  public async getPendingWithdrawals(page = 0, size = 55) {
     return this.get(`/admin/withdrawals/pending?page=${page}&size=${size}`);
   }
 
@@ -161,7 +161,7 @@ class ApiService {
     const params = new URLSearchParams();
     Object.entries(filters).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== '') {
-        params.append(key, value);
+        params.append(key, String(value));
       }
     });
     return this.get(`/admin/withdrawals/filtered?${params.toString()}`);
