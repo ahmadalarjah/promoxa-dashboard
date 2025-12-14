@@ -5,7 +5,7 @@ class ApiService {
 
   constructor() {
     this.api = axios.create({
-      baseURL: 'https://api.promoxa.org/api',
+      baseURL: 'http://localhost:8080/api',
       timeout: 30000,
       headers: {
         'Content-Type': 'application/json',
@@ -75,7 +75,7 @@ class ApiService {
     return this.get('/admin/stats');
   }
 
-  public async getAllUsers(page = 0, size = 55, sort = 'createdAt,desc') {
+  public async getAllUsers(page = 0, size = 20, sort = 'createdAt,desc') {
     return this.get(`/admin/users?page=${page}&size=${size}&sort=${sort}`);
   }
 
@@ -107,7 +107,7 @@ class ApiService {
     return this.post(`/admin/users/${userId}/unban`);
   }
 
-  public async getPendingDeposits(page = 0, size = 55) {
+  public async getPendingDeposits(page = 0, size = 20) {
     return this.get(`/admin/deposits/pending?page=${page}&size=${size}`);
   }
 
@@ -126,7 +126,7 @@ class ApiService {
     const params = new URLSearchParams();
     Object.entries(filters).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== '') {
-        params.append(key, String(value));
+        params.append(key, value);
       }
     });
     return this.get(`/admin/deposits/filtered?${params.toString()}`);
@@ -142,7 +142,7 @@ class ApiService {
     return this.put(`/admin/deposits/${depositId}/reject${params}`);
   }
 
-  public async getPendingWithdrawals(page = 0, size = 55) {
+  public async getPendingWithdrawals(page = 0, size = 20) {
     return this.get(`/admin/withdrawals/pending?page=${page}&size=${size}`);
   }
 
@@ -161,7 +161,7 @@ class ApiService {
     const params = new URLSearchParams();
     Object.entries(filters).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== '') {
-        params.append(key, String(value));
+        params.append(key, value);
       }
     });
     return this.get(`/admin/withdrawals/filtered?${params.toString()}`);
@@ -328,6 +328,29 @@ class ApiService {
   // Additional endpoints from other controllers
   public async getNotifications(page = 0, size = 20) {
     return this.get(`/notifications?page=${page}&size=${size}`);
+  }
+
+  // Admin notification methods (using same endpoints as users since admin is authenticated)
+  public async getAdminNotifications(page = 0, size = 20) {
+    return this.get(`/notifications?page=${page}&size=${size}`);
+  }
+
+  public async getUnreadNotificationCount(): Promise<number> {
+    try {
+      const response = await this.get('/notifications/unread/count');
+      return response.data || 0;
+    } catch (error) {
+      console.error('Error fetching unread notification count:', error);
+      return 0;
+    }
+  }
+
+  public async markNotificationAsRead(notificationId: number): Promise<void> {
+    await this.put(`/notifications/${notificationId}/read`);
+  }
+
+  public async markAllNotificationsAsRead(): Promise<void> {
+    await this.put('/notifications/read-all');
   }
 
   // Promo Code Management
