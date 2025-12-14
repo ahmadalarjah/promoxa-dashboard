@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Menu, Bell, User, LogOut, Search, Settings, Shield, HelpCircle } from 'lucide-react';
+import { Menu, Bell, User, LogOut, Search } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { useNotifications } from '../../context/NotificationContext';
+import NotificationDropdown from '../NotificationDropdown';
 
 interface HeaderProps {
   onToggleSidebar: () => void;
@@ -8,14 +10,20 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
   const { user, logout } = useAuth();
+  const { unreadCount } = useNotifications();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isNotificationDropdownOpen, setIsNotificationDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const notificationDropdownRef = useRef<HTMLDivElement>(null);
 
-  // Close dropdown when clicking outside
+  // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsDropdownOpen(false);
+      }
+      if (notificationDropdownRef.current && !notificationDropdownRef.current.contains(event.target as Node)) {
+        setIsNotificationDropdownOpen(false);
       }
     };
 
@@ -59,42 +67,21 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
       {/* Right side */}
       <div className="flex items-center space-x-4">
         {/* Notifications */}
-        <div className="relative">
-          <button className="p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 relative group">
-            <Bell className="h-5 w-5 text-gray-600 group-hover:text-blue-600 transition-colors duration-200" />
-            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center animate-pulse">
-              3
-            </span>
-            {/* Notification Tooltip */}
-            <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-              <div className="p-4">
-                <h4 className="text-sm font-medium text-gray-900 mb-2">Recent Notifications</h4>
-                <div className="space-y-2">
-                  <div className="flex items-start space-x-2">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
-                    <div className="flex-1">
-                      <p className="text-xs text-gray-900">New withdrawal request</p>
-                      <p className="text-xs text-gray-500">2 minutes ago</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start space-x-2">
-                    <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
-                    <div className="flex-1">
-                      <p className="text-xs text-gray-900">Deposit confirmed</p>
-                      <p className="text-xs text-gray-500">5 minutes ago</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start space-x-2">
-                    <div className="w-2 h-2 bg-yellow-500 rounded-full mt-2"></div>
-                    <div className="flex-1">
-                      <p className="text-xs text-gray-900">System maintenance scheduled</p>
-                      <p className="text-xs text-gray-500">1 hour ago</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+        <div className="relative" ref={notificationDropdownRef}>
+          <button 
+            onClick={() => setIsNotificationDropdownOpen(!isNotificationDropdownOpen)}
+            className="p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 relative"
+          >
+            <Bell className="h-5 w-5 text-gray-600" />
+            {unreadCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-semibold">
+                {unreadCount > 99 ? '99+' : unreadCount}
+              </span>
+            )}
           </button>
+          {isNotificationDropdownOpen && (
+            <NotificationDropdown onClose={() => setIsNotificationDropdownOpen(false)} />
+          )}
         </div>
 
         {/* User Menu */}
@@ -114,36 +101,15 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
 
           {/* Dropdown Menu */}
           {isDropdownOpen && (
-            <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
-              <div className="p-4 border-b border-gray-100">
+            <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+              <div className="p-3 border-b border-gray-100">
                 <p className="text-sm font-medium text-gray-900">{user?.fullName}</p>
                 <p className="text-xs text-gray-500">{user?.email}</p>
-                <div className="mt-2 flex items-center">
-                  <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                  <span className="text-xs text-green-600">Online</span>
-                </div>
               </div>
               <div className="py-2">
-                <button className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200">
-                  <User className="h-4 w-4 mr-3" />
-                  Profile Settings
-                </button>
-                <button className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200">
-                  <Settings className="h-4 w-4 mr-3" />
-                  Account Settings
-                </button>
-                <button className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200">
-                  <Shield className="h-4 w-4 mr-3" />
-                  Security
-                </button>
-                <button className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200">
-                  <HelpCircle className="h-4 w-4 mr-3" />
-                  Help & Support
-                </button>
-                <div className="border-t border-gray-100 my-2"></div>
                 <button
                   onClick={handleLogout}
-                  className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors duration-200"
+                  className="flex items-center w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors duration-200"
                 >
                   <LogOut className="h-4 w-4 mr-3" />
                   Logout
