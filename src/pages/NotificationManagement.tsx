@@ -37,7 +37,8 @@ const NotificationManagement: React.FC = () => {
     { value: 'WITHDRAWAL_REJECTED', label: 'رفض سحب', icon: XCircle },
     { value: 'PLAN_PURCHASED', label: 'شراء خطة', icon: Package },
     { value: 'REFERRAL_BONUS', label: 'مكافأة إحالة', icon: Gift },
-    { value: 'DAILY_EARNINGS', label: 'أرباح يومية', icon: TrendingUp }
+    { value: 'DAILY_EARNINGS', label: 'أرباح يومية', icon: TrendingUp },
+    { value: 'FIRST_DEPOSIT_BONUS', label: 'مكافأة أول إيداع', icon: Gift }
   ];
 
   const handleSubmit = async (e: React.FormEvent) => {
