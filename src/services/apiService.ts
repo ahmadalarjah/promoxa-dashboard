@@ -4,8 +4,10 @@ class ApiService {
   private api: AxiosInstance;
 
   constructor() {
+    // Use production API URL, fallback to localhost for development
+    const apiBaseUrl = import.meta.env.VITE_API_URL || 'https://api.promoxa.org/api';
     this.api = axios.create({
-      baseURL: 'http://localhost:8080/api',
+      baseURL: apiBaseUrl,
       timeout: 30000,
       headers: {
         'Content-Type': 'application/json',
