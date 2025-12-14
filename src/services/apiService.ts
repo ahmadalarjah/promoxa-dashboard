@@ -129,7 +129,7 @@ class ApiService {
     const params = new URLSearchParams();
     Object.entries(filters).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== '') {
-        params.append(key, value);
+        params.append(key, String(value));
       }
     });
     return this.get(`/admin/deposits/filtered?${params.toString()}`);
@@ -164,7 +164,7 @@ class ApiService {
     const params = new URLSearchParams();
     Object.entries(filters).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== '') {
-        params.append(key, value);
+        params.append(key, String(value));
       }
     });
     return this.get(`/admin/withdrawals/filtered?${params.toString()}`);
@@ -473,7 +473,7 @@ class ApiService {
   // Test method to check backend connectivity
   public async testBackendConnection() {
     try {
-      const response = await this.get('/auth/health');
+      await this.get('/auth/health');
       return true;
     } catch (error) {
       console.error('Backend connection failed:', error);
