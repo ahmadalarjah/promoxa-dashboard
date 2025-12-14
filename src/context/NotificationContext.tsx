@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
 import apiService from '../services/apiService';
+import { useAuth } from './AuthContext';
 
 export interface Notification {
   id: number;
@@ -26,6 +27,7 @@ interface NotificationContextType {
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
 
 export function NotificationProvider({ children }: { children: ReactNode }) {
+  const { isAuthenticated } = useAuth();
   const [unreadCount, setUnreadCount] = useState(0);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(false);
@@ -34,7 +36,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
   const loadUnreadCount = async () => {
     try {
-      const count = await apiService.getUnreadNotificationCount();
+      const count = await apiService.getUnreadAdminNotificationCount();
       setUnreadCount(count);
     } catch (error) {
       console.error('Error loading unread count:', error);
@@ -85,7 +87,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
   const markAsRead = async (notificationId: number) => {
     try {
-      await apiService.markNotificationAsRead(notificationId);
+      await apiService.markAdminNotificationAsRead(notificationId);
       // Update local state
       setNotifications(prev =>
         prev.map(notification =>
@@ -103,7 +105,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
   const markAllAsRead = async () => {
     try {
-      await apiService.markAllNotificationsAsRead();
+      await apiService.markAllAdminNotificationsAsRead();
       // Update local state
       setNotifications(prev =>
         prev.map(notification => ({ ...notification, isRead: true }))
@@ -115,18 +117,27 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Load unread count once when app initializes
+  // Load unread count once when app initializes and user is authenticated
   useEffect(() => {
-    if (!hasInitialized) {
+    if (!hasInitialized && isAuthenticated) {
       loadUnreadCount();
       loadNotifications();
       setHasInitialized(true);
+    } else if (!isAuthenticated) {
+      // Reset when user logs out
+      setHasInitialized(false);
+      setNotifications([]);
+      setUnreadCount(0);
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+        pollingIntervalRef.current = null;
+      }
     }
-  }, [hasInitialized]);
+  }, [hasInitialized, isAuthenticated]);
 
-  // Set up polling for new notifications (every 20 seconds)
+  // Set up polling for new notifications (every 20 seconds) - only when authenticated
   useEffect(() => {
-    if (hasInitialized) {
+    if (hasInitialized && isAuthenticated) {
       pollingIntervalRef.current = setInterval(() => {
         loadNotifications();
         loadUnreadCount();
@@ -139,7 +150,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
         }
       };
     }
-  }, [hasInitialized]);
+  }, [hasInitialized, isAuthenticated]);
 
   const value: NotificationContextType = {
     unreadCount,
