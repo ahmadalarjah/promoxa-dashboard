@@ -4,8 +4,9 @@ class ApiService {
   private api: AxiosInstance;
 
   constructor() {
-    // Use production API URL, fallback to localhost for development
-    const apiBaseUrl = import.meta.env.VITE_API_URL || 'https://api.promoxa.org/api';
+    // Use environment variable or default to production API
+    const apiBaseUrl = process.env.REACT_APP_API_URL || 'https://api.promoxa.org/api';
+    
     this.api = axios.create({
       baseURL: apiBaseUrl,
       timeout: 30000,
@@ -332,13 +333,15 @@ class ApiService {
     return this.get(`/notifications?page=${page}&size=${size}`);
   }
 
-  // Admin notification methods (using same endpoints as users since admin is authenticated)
+  // Admin notification methods - admins can use the same endpoints as users since they're authenticated
   public async getAdminNotifications(page = 0, size = 20) {
+    // Use /api/notifications endpoint - works for authenticated users (including admins)
     return this.get(`/notifications?page=${page}&size=${size}`);
   }
 
-  public async getUnreadNotificationCount(): Promise<number> {
+  public async getUnreadAdminNotificationCount(): Promise<number> {
     try {
+      // Use /api/notifications/unread/count endpoint - works for authenticated users (including admins)
       const response = await this.get('/notifications/unread/count');
       return response.data || 0;
     } catch (error) {
@@ -347,12 +350,27 @@ class ApiService {
     }
   }
 
-  public async markNotificationAsRead(notificationId: number): Promise<void> {
+  // Alias for backward compatibility
+  public async getUnreadNotificationCount(): Promise<number> {
+    return this.getUnreadAdminNotificationCount();
+  }
+
+  public async markAdminNotificationAsRead(notificationId: number): Promise<void> {
     await this.put(`/notifications/${notificationId}/read`);
   }
 
-  public async markAllNotificationsAsRead(): Promise<void> {
+  // Alias for backward compatibility
+  public async markNotificationAsRead(notificationId: number): Promise<void> {
+    return this.markAdminNotificationAsRead(notificationId);
+  }
+
+  public async markAllAdminNotificationsAsRead(): Promise<void> {
     await this.put('/notifications/read-all');
+  }
+
+  // Alias for backward compatibility
+  public async markAllNotificationsAsRead(): Promise<void> {
+    return this.markAllAdminNotificationsAsRead();
   }
 
   // Promo Code Management
